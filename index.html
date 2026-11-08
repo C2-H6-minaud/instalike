@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Insta</title>
+<style>
+:root{--bg:#fff;--fg:#111;--mut:#8e8e8e;--line:#dbdbdb;--card:#efefef;--blue:#0095f6}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--fg:#f5f5f5;--line:#262626;--card:#1c1c1c}}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--fg);font:15px/1.35 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
+[hidden]{display:none!important}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.mut,small{color:var(--mut)}
+#lock{position:fixed;inset:0;z-index:9;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+#lock .lg{font-size:44px}
+#dots{display:flex;gap:14px}
+#dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--fg)}
+#dots i.on{background:var(--fg)}
+#pad{display:grid;grid-template-columns:repeat(3,72px);gap:14px}
+#pad button{height:72px;border-radius:50%;border:0;background:var(--card);font-size:26px}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+#app{height:100%;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);position:relative}
+#top{height:48px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line);font-size:22px;font-weight:700}
+#top button{background:none;border:0;font-size:15px;font-weight:600}
+#main{flex:1;min-height:0;overflow-y:auto;position:relative}
+#nav{flex:none;display:flex;border-top:1px solid var(--line);background:var(--bg);padding-bottom:env(safe-area-inset-bottom)}
+#nav button{flex:1;height:50px;border:0;background:none;font-size:22px;opacity:.4}
+#nav .on{opacity:1}
+#app.sc{background:#000;color:#fff;padding-top:0}
+.sc #top{position:absolute;z-index:5;left:0;right:0;top:env(safe-area-inset-top);border:0;background:linear-gradient(#0009,transparent);color:#fff}
+.sc #top button{color:#fff}
+.sc #main{overflow:hidden}
+.sc #nav{background:#000;border-color:#222}
+.av{width:36px;height:36px;border-radius:50%;object-fit:cover;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex:none}
+.av.big{width:80px;height:80px;font-size:30px}
+.stories{display:flex;gap:14px;overflow-x:auto;padding:12px;border-bottom:1px solid var(--line)}
+.st{text-align:center;width:68px;flex:none}
+.st small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.ring{width:64px;height:64px;border-radius:50%;padding:3px;background:linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf);display:flex}
+.ring .av{width:100%;height:100%;border:2px solid var(--bg)}
+.post{padding-bottom:10px}
+.ph{display:flex;align-items:center;gap:8px;padding:10px 12px}
+.pimg{width:100%;display:block;max-height:75vh;object-fit:cover}
+.acts{display:flex;gap:14px;padding:8px 12px;font-size:24px}
+.acts button{background:none;border:0;font-size:24px;padding:0}
+.pb{padding:0 12px}
+.empty,.pad{padding:24px 16px;text-align:center}
+.pad{text-align:left;display:flex;flex-direction:column;gap:12px}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:600;text-align:center;display:block;text-decoration:none}
+.btn.alt{background:var(--card);color:var(--fg)}
+.lnk{background:none;border:0;color:var(--blue);font-weight:600}
+textarea,#mi{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:10px;resize:none}
+textarea{min-height:90px}
+.drop{height:60vw;max-height:340px;border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;background:center/cover;color:var(--mut)}
+.drop.has{color:transparent}
+.rowh{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
+.rowh button:first-child{background:none;border:0;font-size:22px}
+.row{display:flex;align-items:center;gap:12px;padding:10px 14px}
+.row>div{flex:1;min-width:0}
+.row button{background:none;border:0;font-size:18px;color:var(--mut)}
+.u{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.th{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--card);display:flex;align-items:center;justify-content:center;flex:none}
+.chat{height:100%;display:flex;flex-direction:column}
+.chh{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line)}
+.chh button{background:none;border:0;font-size:18px}
+.ml{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px}
+.b{max-width:75%;padding:9px 13px;border-radius:20px;word-break:break-word;white-space:pre-wrap}
+.b.me{align-self:flex-end;background:#3797f0;color:#fff}
+.b.him{align-self:flex-start;background:var(--card)}
+.inp{display:flex;gap:8px;padding:8px 12px}
+#mi{border-radius:22px;padding:9px 14px}
+.inp button{background:none;border:0;color:var(--blue);font-weight:700}
+.prof{display:flex;align-items:center;gap:18px}
+.stat{text-align:center;flex:1}
+.stat b{display:block;font-size:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:0 -16px}
+.grid img{width:100%;aspect-ratio:1;object-fit:cover}
+#reels{position:absolute;inset:0;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain}
+.reel{height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:flex;align-items:center;justify-content:center;background:#000}
+.reel img,.reel video{max-width:100%;max-height:100%;object-fit:contain}
+.lc{display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px;text-align:center;color:#fff;word-break:break-all}
+.lc .lg{font-size:56px}
+.lc .btn{margin-top:10px}
+.side{position:absolute;right:12px;bottom:90px;display:flex;flex-direction:column;gap:18px}
+.side button,.side a{background:none;border:0;font-size:30px;color:#fff;text-decoration:none;text-align:center}
+.cap{position:absolute;left:14px;bottom:24px;right:80px;color:#fff;font-weight:600;text-shadow:0 1px 4px #000;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style></head>
+<body>
+<div id="lock"><div class="lg">🔒</div><p id="lt">Entre ton code</p><div id="dots"><i></i><i></i><i></i><i></i></div><div id="pad"></div></div>
+<div id="app" hidden>
+<header id="top"><span id="title">Insta</span><span id="hact"></span></header>
+<main id="main"></main>
+<nav id="nav"><button data-v="home">🏠</button><button data-v="scroll">▶️</button><button data-v="add">➕</button><button data-v="msgs">💬</button><button data-v="me">👤</button></nav>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S;
+try{S=JSON.parse(localStorage.getItem('insta'))}catch(e){}
+S=S||{posts:[],convs:[],src:[],me:{name:'moi',bio:''}};
+const save=()=>{try{localStorage.setItem('insta',JSON.stringify(S))}catch(e){alert('Stockage plein : supprime quelques images.')}};
+const col=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%360;return`hsl(${h} 60% 45%)`};
+const av=(n,src,cl='')=>src?`<img class="av ${cl}" src="${src}">`:`<span class="av ${cl}" style="background:${col(n)}">${esc((n[0]||'?').toUpperCase())}</span>`;
+const ago=t=>{const m=(Date.now()-t)/6e4|0;return m<1?'à l’instant':m<60?m+' min':m<1440?(m/60|0)+' h':(m/1440|0)+' j'};
+const comp=(f,max=900)=>new Promise(r=>{const i=new Image,u=URL.createObjectURL(f);i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);r(c.toDataURL('image/jpeg',.7))};i.src=u});
+const kind=u=>/^data:image|\.(png|jpe?g|gif|webp|avif|svg|bmp)(\?|#|$)/i.test(u)?'img':/\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(u)?'vid':'lnk';
+const fix=u=>/^(https?:|data:image)/i.test(u)?u:/^[\w-]+(\.[\w-]+)+/.test(u)?'https://'+u:'';
+
+/* Verrouillage : code demandé à chaque ouverture */
+let pin='';
+['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(k=>{const b=document.createElement('button');b.textContent=k;if(!k)b.style.visibility='hidden';b.onclick=()=>key(k);$('#pad').append(b)});
+function key(k){
+ if(k==='⌫')pin=pin.slice(0,-1);else if(pin.length<4)pin+=k;
+ document.querySelectorAll('#dots i').forEach((d,i)=>d.classList.toggle('on',i<pin.length));
+ if(pin.length<4)return;
+ if(pin==='1234'){$('#lock').hidden=true;$('#app').hidden=false;go('home')}
+ else{$('#lock').classList.add('shake');$('#lt').textContent='Code incorrect';setTimeout(()=>{$('#lock').classList.remove('shake');pin='';key('⌫');$('#lt').textContent='Entre ton code'},400)}
+}
+
+/* Navigation */
+let V='home',chat=null,pend=null,asHim=false,bag=[],lastU='';
+function go(v,c){V=v;chat=c||null;if(v==='add')pend=null;render()}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+$('#hact').onclick=()=>go('src');
+
+const post=p=>`<article class="post"><div class="ph">${av(S.me.name,S.me.avatar)}<b>${esc(S.me.name)}</b><span class="mut">· ${ago(p.t)}</span></div><img class="pimg" src="${p.img}"><div class="acts"><button data-a="like" data-id="${p.id}">${p.liked?'❤️':'🤍'}</button><button data-a="cmt" data-id="${p.id}">💬</button><button data-a="save" data-id="${p.id}">${p.saved?'🔖':'📑'}</button></div><div class="pb"><b>${p.liked?1:0} j’aime</b>${p.cap?`<p><b>${esc(S.me.name)}</b> ${esc(p.cap)}</p>`:''}${p.cm.map(c=>`<p class="mut">${esc(c)}</p>`).join('')}</div></article>`;
+function home(){
+ const st=[{n:'Ta story',s:S.me.avatar,a:'me'},...S.convs.map(c=>({n:c.name,id:c.id,a:'chat'}))];
+ return `<div class="stories">${st.map(x=>`<div class="st" data-a="${x.a}" data-id="${x.id||''}"><div class="ring">${av(x.n,x.s)}</div><small>${esc(x.n)}</small></div>`).join('')}</div>`+(S.posts.length?S.posts.map(post).join(''):'<p class="empty mut">Aucune publication.<br>Appuie sur ➕ pour poster ta première photo.</p>');
+}
+const add=()=>`<div class="pad"><label class="drop" id="pv">Choisir une photo<input type="file" accept="image/*" id="pf" hidden></label><textarea id="cap" placeholder="Écris une légende…"></textarea><button class="btn" data-a="publish">Partager</button></div>`;
+
+/* Messages */
+function msgs(){
+ return `<div class="rowh"><b>Messages</b><button class="lnk" data-a="newc">Nouveau ✏️</button></div>`+(S.convs.length?S.convs.map(c=>{const l=c.msgs[c.msgs.length-1];return `<div class="row" data-a="chat" data-id="${c.id}">${av(c.name)}<div><b>${esc(c.name)}</b><br><span class="mut u">${l?esc(l.x.slice(0,40))+' · '+ago(l.t):'Dis bonjour 👋'}</span></div></div>`}).join(''):'<p class="empty mut">Aucune discussion.<br>Appuie sur « Nouveau » pour en créer une.</p>');
+}
+function chatv(){
+ const c=S.convs.find(x=>x.id==chat);
+ return `<div class="chat"><div class="chh"><button data-a="back">←</button>${av(c.name)}<b>${esc(c.name)}</b><span style="flex:1"></span><button data-a="who" data-n="${esc(c.name)}">🗣 ${asHim?esc(c.name):'Moi'}</button><button data-a="delc">🗑</button></div><div class="ml" id="ml">${c.msgs.map(m=>`<div class="b ${m.me?'me':'him'}">${esc(m.x)}</div>`).join('')}</div><div class="inp"><input id="mi" placeholder="Message…" autocomplete="off"><button data-a="send">Envoyer</button></div></div>`;
+}
+function send(){
+ const i=$('#mi'),x=i.value.trim();if(!x)return;
+ const c=S.convs.find(c=>c.id==chat),m={me:!asHim,x,t:Date.now()};
+ c.msgs.push(m);save();
+ const l=$('#ml');l.insertAdjacentHTML('beforeend',`<div class="b ${m.me?'me':'him'}">${esc(x)}</div>`);l.scrollTop=l.scrollHeight;i.value='';i.focus();
+}
+
+/* Scroll : défilement vertical, éléments tirés au hasard dans la liste */
+function nxt(){
+ if(!S.src.length)return;
+ if(!bag.length){bag=[...S.src].sort(()=>Math.random()-.5);const n=bag.length-1;if(n>0&&bag[n].u===lastU)[bag[0],bag[n]]=[bag[n],bag[0]]}
+ const s=bag.pop();lastU=s.u;return s;
+}
+function reel(s){
+ const k=kind(s.u);let d='';try{d=new URL(s.u).hostname.replace('www.','')}catch(e){}
+ const body=k==='img'?`<img src="${esc(s.u)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'lc',textContent:'Image indisponible'}))">`
+  :k==='vid'?`<video src="${esc(s.u)}" muted loop playsinline></video>`
+  :`<div class="lc"><div class="lg">🔗</div><b>${esc(d||s.u)}</b><small>${esc(s.u.slice(0,90))}</small><a class="btn" href="${esc(s.u)}" target="_blank" rel="noopener">Ouvrir le lien</a></div>`;
+ return `<section class="reel"${k==='lnk'?` style="background:linear-gradient(160deg,${col(d)},#111)"`:''}>${body}<div class="side"><button data-a="rl">🤍</button>${k==='lnk'?'':`<a href="${esc(s.u)}" target="_blank" rel="noopener">↗</a>`}</div><div class="cap">${esc(d||'Image locale')}</div></section>`;
+}
+const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?e.target.play().catch(()=>{}):e.target.pause()),{threshold:.6});
+function fill(n){
+ const r=$('#reels');if(!r)return;
+ for(let i=0;i<n;i++){const s=nxt();if(!s)break;r.insertAdjacentHTML('beforeend',reel(s))}
+ r.querySelectorAll('video').forEach(v=>io.observe(v));
+}
+function scr(){
+ return S.src.length?'<div id="reels"></div>':`<div class="empty" style="padding-top:30vh;color:#fff"><p>Ta liste est vide.</p><br><button class="btn" data-a="gosrc">Ajouter des liens / images</button></div>`;
+}
+function srcv(){
+ return `<div class="pad"><div class="rowh" style="padding:0"><button data-a="toscroll">←</button><b>Ma liste</b><span></span></div><textarea id="sl" placeholder="Colle des liens ou des adresses d’images, un par ligne"></textarea><button class="btn" data-a="addsrc">Ajouter à la liste</button><label class="btn alt">Ajouter des images de la galerie<input type="file" id="sf" accept="image/*" multiple hidden></label><p class="mut">${S.src.length} élément(s) · ils apparaissent au hasard dans Scroll</p>${S.src.map((s,i)=>`<div class="row" style="padding:0">${kind(s.u)==='img'?`<img class="th" src="${esc(s.u)}">`:'<span class="th">🔗</span>'}<span class="u">${s.u.startsWith('data:')?'Image locale':esc(s.u)}</span><button data-a="dels" data-id="${i}">✕</button></div>`).join('')}${S.src.length?'<button class="lnk" data-a="clr">Tout vider</button>':''}</div>`;
+}
+
+/* Profil */
+function me(){
+ const m=S.me;
+ return `<div class="pad"><div class="prof">${av(m.name,m.avatar,'big')}<div class="stat"><b>${S.posts.length}</b><small>publications</small></div><div class="stat"><b>${S.src.length}</b><small>sources</small></div><div class="stat"><b>${S.convs.length}</b><small>discussions</small></div></div><div><b>${esc(m.name)}</b><p>${esc(m.bio)||'<span class="mut">Ajoute une bio</span>'}</p></div><div class="two"><button class="btn alt" data-a="edit">Modifier le profil</button><label class="btn alt">Changer la photo<input type="file" id="avf" accept="image/*" hidden></label></div><button class="lnk" data-a="exp">Exporter une sauvegarde</button><div class="grid">${S.posts.map(p=>`<img src="${p.img}" data-a="delp" data-id="${p.id}">`).join('')}</div></div>`;
+}
+
+function render(keep){
+ const m=$('#main'),y=m.scrollTop;
+ $('#app').className=V==='scroll'?'sc':'';
+ $('#title').textContent={home:'Insta',scroll:'Scroll',add:'Nouvelle publication',msgs:'Messages',me:S.me.name,src:'Ma liste'}[V];
+ $('#hact').innerHTML=V==='scroll'?'<button>☰ Liste</button>':'';
+ document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===(V==='src'?'scroll':V)));
+ m.innerHTML=({home,scroll:scr,add,msgs:()=>chat?chatv():msgs(),me,src:srcv})[V]();
+ m.scrollTop=keep?y:0;
+ if(V==='scroll')fill(4);
+ if(chat){const l=$('#ml');l.scrollTop=l.scrollHeight}
+}
+
+const A={
+ me:()=>go('me'),chat:id=>go('msgs',id),back:()=>go('msgs'),toscroll:()=>go('scroll'),gosrc:()=>go('src'),
+ like:id=>{const p=S.posts.find(x=>x.id==id);p.liked=!p.liked;save();render(1)},
+ save:id=>{const p=S.posts.find(x=>x.id==id);p.saved=!p.saved;save();render(1)},
+ cmt:id=>{const x=prompt('Ton commentaire');if(x&&x.trim()){S.posts.find(p=>p.id==id).cm.push(x.trim());save();render(1)}},
+ publish:()=>{if(!pend)return alert('Choisis d’abord une photo');S.posts.unshift({id:Date.now(),img:pend,cap:$('#cap').value.trim(),t:Date.now(),liked:0,saved:0,cm:[]});save();go('home')},
+ newc:()=>{const n=prompt('Nom du contact');if(n&&n.trim()){const c={id:Date.now(),name:n.trim(),msgs:[]};S.convs.push(c);save();go('msgs',c.id)}},
+ who:(id,t)=>{asHim=!asHim;t.textContent='🗣 '+(asHim?t.dataset.n:'Moi')},
+ delc:()=>{if(confirm('Supprimer cette discussion ?')){S.convs=S.convs.filter(c=>c.id!=chat);save();go('msgs')}},
+ send,
+ rl:(id,t)=>{t.textContent=t.textContent==='🤍'?'❤️':'🤍'},
+ addsrc:()=>{const have=new Set(S.src.map(s=>s.u));$('#sl').value.split(/\s+/).map(fix).filter(u=>u&&!have.has(u)).forEach(u=>{S.src.push({u});have.add(u)});save();bag=[];render(1)},
+ dels:i=>{S.src.splice(i,1);save();bag=[];render(1)},
+ clr:()=>{if(confirm('Vider toute la liste ?')){S.src=[];save();bag=[];render()}},
+ edit:()=>{const n=prompt('Nom',S.me.name);if(n&&n.trim())S.me.name=n.trim();const b=prompt('Bio',S.me.bio);if(b!==null)S.me.bio=b;save();render(1)},
+ exp:()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='insta-sauvegarde.json';a.click()},
+ delp:id=>{if(confirm('Supprimer cette publication ?')){S.posts=S.posts.filter(p=>p.id!=id);save();render(1)}}
+};
+const M=$('#main');
+M.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(t&&A[t.dataset.a])A[t.dataset.a](t.dataset.id,t)});
+M.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='mi')send()});
+M.addEventListener('change',async e=>{
+ const f=e.target,fs=[...f.files||[]];if(!fs.length)return;
+ if(f.id==='pf'){pend=await comp(fs[0]);const p=$('#pv');p.style.backgroundImage=`url(${pend})`;p.classList.add('has')}
+ else if(f.id==='sf'){for(const x of fs)S.src.push({u:await comp(x,720)});save();bag=[];render(1)}
+ else if(f.id==='avf'){S.me.avatar=await comp(fs[0],200);save();render(1)}
+});
+M.addEventListener('scroll',e=>{const r=e.target;if(r.id==='reels'&&r.scrollTop+r.clientHeight*2>r.scrollHeight)fill(3)},true);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body></html>
